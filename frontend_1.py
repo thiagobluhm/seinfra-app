@@ -110,24 +110,27 @@ with st.sidebar:
         #     st.session_state["etapa"] = "analise_feita"
 
         if uploaded_file:
-            temp_file_path = save_uploaded_file(uploaded_file)  # Salva o arquivo corretamente
-            st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")  # Debug
-
-            # Armazena o caminho do arquivo no session_state
+            temp_file_path = save_uploaded_file(uploaded_file)
+            st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")
+            
+            # Atualiza o session_state corretamente
             st.session_state["arquivo_orcamento"] = temp_file_path
             st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
-
-            # ALTERAÇÃO IMPORTANTE: Agora mudamos a etapa corretamente!
+            
+            # ALTERAÇÃO IMPORTANTE: Atualizar a etapa para "analise_feita"
             st.session_state["etapa"] = "analise_feita"
 
-            # Força a atualização da interface
+            # Atualizar a interface
             st.rerun()
+
 
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
     if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
         if st.button("📊 Comparar com Tabela de Insumos"):
             st.session_state["prompt"] = "Agora que extraímos as informações do PDF com o orçamento, vamos comparar com a nossa tabela de insumos que está em nossa base de dados."
             st.session_state["etapa"] = "comparacao_realizada"
+            st.rerun()
+
 
     # Novo Botão: Verificar Outro Documento (não apaga histórico, só reinicia a análise)
     if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
