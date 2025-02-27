@@ -32,13 +32,16 @@ def get_file_name(uploaded_file):
     return uploaded_file if uploaded_file else "Nenhum arquivo selecionado."
 
 def save_uploaded_file(uploaded_file):
-    temp_dir = tempfile.gettempdir()  # Obtém um diretório temporário válido
-    temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Caminho completo do arquivo
+    temp_dir = tempfile.gettempdir()  # Obtém o diretório temporário correto
+    temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Mantém o nome original
 
     with open(temp_file_path, "wb") as temp_file:
         temp_file.write(uploaded_file.getbuffer())  # Salva corretamente o conteúdo
 
+    print(f"✅ Arquivo salvo temporariamente em: {temp_file_path}")  # Debug no console
+
     return temp_file_path  # Retorna o caminho correto do arquivo salvo
+
 
 
 # Função para enviar prompt para a API
@@ -120,15 +123,14 @@ with st.sidebar:
             temp_file_path = save_uploaded_file(uploaded_file)
             st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")
             
-            # Exibir arquivos dentro da pasta temp (DEBUG)
-            st.write("📂 Arquivos no diretório temporário:", os.listdir(tempfile.gettempdir()))
-            
             # Atualiza o session_state corretamente
             st.session_state["arquivo_orcamento"] = temp_file_path
             st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
             
-            # Atualizar a etapa corretamente
+            # Atualiza a etapa para permitir a comparação
             st.session_state["etapa"] = "analise_feita"
+            st.rerun()
+
 
 
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
