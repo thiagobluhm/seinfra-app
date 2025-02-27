@@ -21,11 +21,21 @@ API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/seinfra
 #"seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net"
 
 # Função para salvar o arquivo temporariamente
+# def save_uploaded_file(uploaded_file):
+#     file_extension = Path(uploaded_file.name).suffix
+#     with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
+#         temp_file.write(uploaded_file.read())
+#         return temp_file.name
+
 def save_uploaded_file(uploaded_file):
-    file_extension = Path(uploaded_file.name).suffix
-    with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
-        temp_file.write(uploaded_file.read())
-        return temp_file.name
+    temp_dir = tempfile.gettempdir()  # Obtém um diretório temporário válido
+    temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Caminho completo do arquivo
+
+    with open(temp_file_path, "wb") as temp_file:
+        temp_file.write(uploaded_file.getbuffer())  # Salva corretamente o conteúdo
+
+    return temp_file_path  # Retorna o caminho correto do arquivo salvo
+
 
 # Função para enviar prompt para a API
 def enviar_prompt_api(prompt, session_id, chat_history):
@@ -89,10 +99,12 @@ with st.sidebar:
         uploaded_file = st.file_uploader("📂 Envie o arquivo PDF do orçamento", type=["pdf"])
 
         if uploaded_file:
-            temp_file_path = save_uploaded_file(uploaded_file)
+            temp_file_path = save_uploaded_file(uploaded_file)  # Salva o arquivo corretamente
+            st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")  # Debug para ver onde foi salvo
             st.session_state["arquivo_orcamento"] = temp_file_path
             st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
             st.session_state["etapa"] = "analise_feita"
+
 
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
     if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
