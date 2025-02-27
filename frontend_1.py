@@ -82,7 +82,7 @@ def resetar_tudo():
     st.session_state["chat_history"] = []
     st.session_state["messages"] = [{"role": "assistant", "content": "Olá, sou o AIstein, assistente digital da SEINFRA. Como posso ajudar?"}]
     st.session_state["etapa"] = "inicio"
-    st.experimental_rerun()
+    st.rerun()
 
 # Layout da barra lateral
 with st.sidebar:
@@ -121,7 +121,8 @@ with st.sidebar:
             st.session_state["etapa"] = "analise_feita"
 
             # Força a atualização da interface
-            st.experimental_rerun()
+            st.rerun()
+
 
 
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
@@ -136,7 +137,7 @@ with st.sidebar:
             st.session_state["etapa"] = "aguardando_pdf"  # Volta para a etapa de upload
             st.session_state.pop("arquivo_orcamento", None)  # Remove o arquivo antigo
             st.session_state["prompt"] = "Envie um novo documento para análise."  # Mensagem automática
-            st.experimental_rerun()
+            st.rerun()
 
 st.title("🗨️ Assistente Digital - SEINFRA")
 
