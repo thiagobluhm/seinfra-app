@@ -27,6 +27,10 @@ API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/seinfra
 #         temp_file.write(uploaded_file.read())
 #         return temp_file.name
 
+# Função para simular o caminho do arquivo (já que não podemos acessar o caminho diretamente)
+def get_file_name(uploaded_file):
+    return uploaded_file if uploaded_file else "Nenhum arquivo selecionado."
+
 def save_uploaded_file(uploaded_file):
     temp_dir = tempfile.gettempdir()  # Obtém um diretório temporário válido
     temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Caminho completo do arquivo
@@ -98,12 +102,21 @@ with st.sidebar:
     if st.session_state["etapa"] in ["aguardando_pdf", "analise_feita"]:
         uploaded_file = st.file_uploader("📂 Envie o arquivo PDF do orçamento", type=["pdf"])
 
+        # if uploaded_file:
+        #     temp_file_path = save_uploaded_file(uploaded_file)  # Salva o arquivo corretamente
+        #     st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")  # Debug para ver onde foi salvo
+        #     st.session_state["arquivo_orcamento"] = temp_file_path
+        #     st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
+        #     st.session_state["etapa"] = "analise_feita"
+
         if uploaded_file:
-            temp_file_path = save_uploaded_file(uploaded_file)  # Salva o arquivo corretamente
-            st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")  # Debug para ver onde foi salvo
-            st.session_state["arquivo_orcamento"] = temp_file_path
-            st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
-            st.session_state["etapa"] = "analise_feita"
+            uploaded_file = save_uploaded_file(uploaded_file)
+            file_name = get_file_name(uploaded_file)
+            print(f"Arquivo carregado: {file_name}")
+            # Adiciona a mensagem no chat assim que o arquivo é carregado, se ainda não estiver no chat
+            if not any(msg['content'] == f"Arquivo carregado: {file_name}" for msg in st.session_state.messages):
+                st.session_state.messages.append({"role": "user", "content": f"Arquivo carregado: {file_name}"})
+                #st.chat_message("user", avatar="👤").write(f"Arquivo carregado: {file_name}")
 
 
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
