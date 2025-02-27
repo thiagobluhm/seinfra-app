@@ -129,7 +129,7 @@ with st.sidebar:
             
             # Atualiza a etapa para permitir a comparação
             st.session_state["etapa"] = "analise_feita"
-            st.rerun()
+
 
 
 
