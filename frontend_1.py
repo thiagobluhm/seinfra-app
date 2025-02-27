@@ -122,15 +122,17 @@ with st.sidebar:
         if uploaded_file:
             temp_file_path = save_uploaded_file(uploaded_file)
             st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")
+            file_name = get_file_name(uploaded_file)
+            st.write("📂 Getfilename Temporário:", file_name)
+            # Exibir arquivos dentro da pasta temp (DEBUG)
+            st.write("📂 Arquivos no diretório temporário:", os.listdir(tempfile.gettempdir()))
             
             # Atualiza o session_state corretamente
             st.session_state["arquivo_orcamento"] = temp_file_path
             st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
             
-            # Atualiza a etapa para permitir a comparação
+            # Atualizar a etapa corretamente
             st.session_state["etapa"] = "analise_feita"
-
-
 
 
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
