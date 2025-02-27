@@ -120,9 +120,6 @@ with st.sidebar:
             # ALTERAÇÃO IMPORTANTE: Atualizar a etapa para "analise_feita"
             st.session_state["etapa"] = "analise_feita"
 
-            # Atualizar a interface
-            st.rerun()
-
 
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
     if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
