@@ -45,6 +45,11 @@ def save_uploaded_file(uploaded_file):
 def enviar_prompt_api(prompt, session_id, chat_history):
     try:
         headers = {'Content-Type': 'application/json'}
+
+        # 🔎 DEBUG: Verifica se o arquivo está salvo no session_state
+        print(f"🚀 Enviando prompt: {prompt}")
+        print(f"📂 Arquivo no session_state: {st.session_state.get('arquivo_orcamento', 'Nenhum arquivo')}")
+
         response = requests.post(
             API_URL,
             headers=headers,
@@ -61,6 +66,8 @@ def enviar_prompt_api(prompt, session_id, chat_history):
         return {"resposta": "Erro: Problema de conexão.", "chat_history": chat_history}
     except Exception as e:
         return {"resposta": f"Erro inesperado: {e}", "chat_history": chat_history}
+
+
 
 # Inicializa sessão se necessário
 if "hash_id" not in st.session_state:
@@ -113,11 +120,14 @@ with st.sidebar:
             temp_file_path = save_uploaded_file(uploaded_file)
             st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")
             
+            # Exibir arquivos dentro da pasta temp (DEBUG)
+            st.write("📂 Arquivos no diretório temporário:", os.listdir(tempfile.gettempdir()))
+            
             # Atualiza o session_state corretamente
             st.session_state["arquivo_orcamento"] = temp_file_path
             st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
             
-            # ALTERAÇÃO IMPORTANTE: Atualizar a etapa para "analise_feita"
+            # Atualizar a etapa corretamente
             st.session_state["etapa"] = "analise_feita"
 
 
