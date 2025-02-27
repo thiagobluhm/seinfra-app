@@ -110,12 +110,13 @@ with st.sidebar:
         #     st.session_state["etapa"] = "analise_feita"
 
         if uploaded_file:
-            temp_file_path = save_uploaded_file(uploaded_file)  # Salva o arquivo corretamente
-            st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")  # Debug
-
-            # Armazena o caminho do arquivo no session_state
-            st.session_state["arquivo_orcamento"] = temp_file_path
-            st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
+            uploaded_file = save_uploaded_file(uploaded_file)
+            file_name = get_file_name(uploaded_file)
+            print(f"📂 Arquivo salvo temporariamente em: {file_name}")
+            # Adiciona a mensagem no chat assim que o arquivo é carregado, se ainda não estiver no chat
+            if not any(msg['content'] == f"Arquivo carregado: {file_name}" for msg in st.session_state.messages):
+                st.session_state.messages.append({"role": "user", "content": f"Arquivo carregado: {file_name}"})
+                #st.chat_message("user", avatar="👤").write(f"Arquivo carregado: {file_name}")
 
             # ALTERAÇÃO IMPORTANTE: Agora mudamos a etapa corretamente!
             st.session_state["etapa"] = "analise_feita"
