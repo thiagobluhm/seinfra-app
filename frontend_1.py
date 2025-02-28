@@ -31,18 +31,28 @@ API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/seinfra
 def get_file_name(uploaded_file):
     return uploaded_file if uploaded_file else "Nenhum arquivo selecionado."
 
-def save_uploaded_file(uploaded_file):
-    temp_dir = "/home/site/temp"  # Diretório persistente no Azure Web App
-    os.makedirs(temp_dir, exist_ok=True)  # Garante que o diretório existe
+# def save_uploaded_file(uploaded_file):
+#     temp_dir = "/home/site/temp"  # Diretório persistente no Azure Web App
+#     os.makedirs(temp_dir, exist_ok=True)  # Garante que o diretório existe
 
-    temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Caminho completo do arquivo
+#     temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Caminho completo do arquivo
 
-    with open(temp_file_path, "wb") as temp_file:
-        temp_file.write(uploaded_file.getbuffer())  # Salva corretamente o conteúdo
+#     with open(temp_file_path, "wb") as temp_file:
+#         temp_file.write(uploaded_file.getbuffer())  # Salva corretamente o conteúdo
 
-    return temp_file_path  # Retorna o caminho correto do arquivo salvo
+#     return temp_file_path  # Retorna o caminho correto do arquivo salvo
+import requests
 
+def send_file_to_api(uploaded_file):
+    api_url = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/upload"
 
+    files = {"file": (uploaded_file.name, uploaded_file.getbuffer(), "application/pdf")}
+    response = requests.post(api_url, files=files)
+
+    if response.status_code == 200:
+        return response.json()  # Sucesso
+    else:
+        return {"erro": "Falha ao enviar o arquivo para a API"}
 
 
 # Função para enviar prompt para a API
@@ -121,22 +131,13 @@ with st.sidebar:
         #     st.session_state["etapa"] = "analise_feita"
 
         if uploaded_file:
-            # Salvando o arquivo corretamente na pasta /tmp/
-            temp_file_path = os.path.join(tempfile.gettempdir(), uploaded_file.name)
+            response = send_file_to_api(uploaded_file)
 
-            with open(temp_file_path, "wb") as temp_file:
-                temp_file.write(uploaded_file.getbuffer())
+            if "erro" in response:
+                st.error("Erro ao enviar o arquivo para a API. Tente novamente.")
+            else:
+                st.success(f"Arquivo enviado com sucesso! Caminho no servidor: {response['file_path']}")
 
-            # Debug: Exibir informações
-            st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")
-            st.write("📂 Arquivos no diretório temporário:", os.listdir(tempfile.gettempdir()))
-
-            # Atualiza o session_state corretamente
-            st.session_state["arquivo_orcamento"] = temp_file_path
-            st.session_state["prompt"] = f"Arquivo `{uploaded_file.name}` carregado. Extraia as informações do orçamento."
-
-            # Atualizar a etapa corretamente
-            st.session_state["etapa"] = "analise_feita"
 
 
 
