@@ -139,8 +139,6 @@ with st.sidebar:
                 st.success(f"Arquivo enviado com sucesso! Caminho no servidor: {response['file_path']}")
 
 
-
-
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
     if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
         if st.button("📊 Comparar com Tabela de Insumos"):
