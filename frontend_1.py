@@ -11,9 +11,18 @@ API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net"
 def listar_arquivos():
     try:
         response = requests.get(f"{API_URL}/listar_arquivos")
+
+        # Verifica se a resposta é JSON antes de tentar acessar
         if response.status_code == 200:
-            return response.json().get("arquivos", [])
-        return []
+            try:
+                data = response.json()
+                return data.get("arquivos", [])  # Retorna a lista de arquivos ou uma lista vazia
+            except ValueError:
+                st.error("Erro ao processar resposta da API (não é um JSON válido).")
+                return []
+        else:
+            st.error(f"Erro na requisição ({response.status_code}): {response.text}")
+            return []
     except requests.RequestException as e:
         st.error(f"Erro ao buscar arquivos: {e}")
         return []
