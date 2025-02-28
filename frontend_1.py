@@ -32,15 +32,16 @@ def get_file_name(uploaded_file):
     return uploaded_file if uploaded_file else "Nenhum arquivo selecionado."
 
 def save_uploaded_file(uploaded_file):
-    temp_dir = tempfile.gettempdir()  # Obtém o diretório temporário correto
-    temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Mantém o nome original
+    temp_dir = "/home/site/temp"  # Diretório persistente no Azure Web App
+    os.makedirs(temp_dir, exist_ok=True)  # Garante que o diretório existe
+
+    temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Caminho completo do arquivo
 
     with open(temp_file_path, "wb") as temp_file:
         temp_file.write(uploaded_file.getbuffer())  # Salva corretamente o conteúdo
 
-    print(f"✅ Arquivo salvo temporariamente em: {temp_file_path}")  # Debug no console
-
     return temp_file_path  # Retorna o caminho correto do arquivo salvo
+
 
 
 
