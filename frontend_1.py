@@ -3,12 +3,18 @@ import streamlit as st
 import requests
 import hashlib
 from datetime import datetime
-import tempfile
-from pathlib import Path
 import os
 
-# Configuração inicial
-os.chdir(os.path.abspath(os.curdir))
+# Diretório onde os arquivos PDF são armazenados dentro do container
+STORAGE_DIR = "/app/arquivospdfs"
+
+# Garantir que o diretório existe
+os.makedirs(STORAGE_DIR, exist_ok=True)
+
+# Função para listar arquivos disponíveis no diretório
+def listar_arquivos():
+    arquivos = [f for f in os.listdir(STORAGE_DIR) if f.endswith(".pdf")]
+    return arquivos if arquivos else ["Nenhum arquivo disponível"]
 
 # Função para gerar um identificador de conversa
 def conversaID():
@@ -18,68 +24,11 @@ def conversaID():
 
 # URL do backend FastAPI (ajuste conforme necessário)
 API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/seinfra/"
-#"seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net"
-
-# Função para salvar o arquivo temporariamente
-# def save_uploaded_file(uploaded_file):
-#     file_extension = Path(uploaded_file.name).suffix
-#     with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
-#         temp_file.write(uploaded_file.read())
-#         return temp_file.name
-
-# Função para simular o caminho do arquivo (já que não podemos acessar o caminho diretamente)
-def get_file_name(uploaded_file):
-    return uploaded_file if uploaded_file else "Nenhum arquivo selecionado."
-
-# def save_uploaded_file(uploaded_file):
-#     temp_dir = "/home/site/temp"  # Diretório persistente no Azure Web App
-#     os.makedirs(temp_dir, exist_ok=True)  # Garante que o diretório existe
-
-#     temp_file_path = os.path.join(temp_dir, uploaded_file.name)  # Caminho completo do arquivo
-
-#     with open(temp_file_path, "wb") as temp_file:
-#         temp_file.write(uploaded_file.getbuffer())  # Salva corretamente o conteúdo
-
-#     return temp_file_path  # Retorna o caminho correto do arquivo salvo
-import requests
-
-# def send_file_to_api(uploaded_file):
-#     api_url = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/upload"
-
-#     files = {"file": (uploaded_file.name, uploaded_file.getbuffer(), "application/pdf")}
-#     response = requests.post(api_url, files=files)
-
-#     if response.status_code == 200:
-#         return response.json()  # Sucesso
-#     else:
-#         return {"erro": "Falha ao enviar o arquivo para a API"}
-
-def upload_to_api(uploaded_file):
-    files = {"file": (uploaded_file.name, uploaded_file.getvalue())}
-    response = requests.post("https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/upload", files=files)
-
-    try:
-        response_json = response.json()
-        st.write("🔍 Resposta da API:", response_json)  # Loga a resposta para debugging
-
-        if response.status_code == 200 and "path" in response_json:
-            st.success(f"✅ Arquivo enviado e salvo com sucesso no servidor.")
-            return response_json["path"]
-        else:
-            st.error(f"⚠️ Erro ao enviar o arquivo: {response_json}")
-            return None
-    except Exception as e:
-        st.error(f"❌ Erro ao processar a resposta da API: {e}")
-        return None
 
 # Função para enviar prompt para a API
 def enviar_prompt_api(prompt, session_id, chat_history):
     try:
         headers = {'Content-Type': 'application/json'}
-
-        # 🔎 DEBUG: Verifica se o arquivo está salvo no session_state
-        print(f"🚀 Enviando prompt: {prompt}")
-        print(f"📂 Arquivo no session_state: {st.session_state.get('arquivo_orcamento', 'Nenhum arquivo')}")
 
         response = requests.post(
             API_URL,
@@ -98,8 +47,6 @@ def enviar_prompt_api(prompt, session_id, chat_history):
     except Exception as e:
         return {"resposta": f"Erro inesperado: {e}", "chat_history": chat_history}
 
-
-
 # Inicializa sessão se necessário
 if "hash_id" not in st.session_state:
     st.session_state["hash_id"] = conversaID()
@@ -115,7 +62,7 @@ if "etapa" not in st.session_state:
 
 # Função para resetar tudo
 def resetar_tudo():
-    st.session_state.clear()  # Apaga tudo do session_state
+    st.session_state.clear()
     st.session_state["hash_id"] = conversaID()
     st.session_state["chat_history"] = []
     st.session_state["messages"] = [{"role": "assistant", "content": "Olá, sou o AIstein, assistente digital da SEINFRA. Como posso ajudar?"}]
@@ -126,7 +73,7 @@ def resetar_tudo():
 with st.sidebar:
     st.image('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgcOUfw-4BV2YMHyaOIecFKJCuz6uURut4mg&s', use_container_width="auto")
 
-    # Botão para resetar tudo (zera chat e reinicia do zero)
+    # Botão para resetar tudo
     if st.button("🧹 Resetar Tudo"):
         resetar_tudo()
 
@@ -136,39 +83,32 @@ with st.sidebar:
             st.session_state["prompt"] = "Vou te passar um arquivo PDF com o orçamento de uma construtora. Quero que extraia as informações contidas neste arquivo."
             st.session_state["etapa"] = "aguardando_pdf"
 
-    # Passo 2: Upload de PDF só aparece após clicar em "Analisar Orçamento"
+    # Passo 2: Selecionar um arquivo já existente
     if st.session_state["etapa"] in ["aguardando_pdf", "analise_feita"]:
-        uploaded_file = st.file_uploader("📂 Envie o arquivo PDF do orçamento", type=["pdf"])
+        arquivos_disponiveis = listar_arquivos()
 
-        # if uploaded_file:
-        #     temp_file_path = save_uploaded_file(uploaded_file)  # Salva o arquivo corretamente
-        #     st.write(f"📂 Arquivo salvo temporariamente em: `{temp_file_path}`")  # Debug para ver onde foi salvo
-        #     st.session_state["arquivo_orcamento"] = temp_file_path
-        #     st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
-        #     st.session_state["etapa"] = "analise_feita"
+        arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis)
 
+        if arquivo_selecionado and arquivo_selecionado != "Nenhum arquivo disponível":
+            caminho_completo = os.path.join(STORAGE_DIR, arquivo_selecionado)
+            st.session_state["arquivo_orcamento"] = caminho_completo
+            st.session_state["prompt"] = f"Arquivo `{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
+            st.session_state["etapa"] = "analise_feita"
+            st.rerun()
 
-        if uploaded_file:
-            file_path = upload_to_api(uploaded_file)
-            if file_path:
-                st.session_state["arquivo_orcamento"] = file_path
-                st.session_state["etapa"] = "analise_feita"
-
-
-    # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
+    # Passo 3: Comparação com a Tabela de Insumos (disponível após extração)
     if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
         if st.button("📊 Comparar com Tabela de Insumos"):
             st.session_state["prompt"] = "Agora que extraímos as informações do PDF com o orçamento, vamos comparar com a nossa tabela de insumos que está em nossa base de dados."
             st.session_state["etapa"] = "comparacao_realizada"
             st.rerun()
 
-
-    # Novo Botão: Verificar Outro Documento (não apaga histórico, só reinicia a análise)
+    # Novo Botão: Verificar Outro Documento
     if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
         if st.button("🔄 Verificar Outro Documento"):
-            st.session_state["etapa"] = "aguardando_pdf"  # Volta para a etapa de upload
-            st.session_state.pop("arquivo_orcamento", None)  # Remove o arquivo antigo
-            st.session_state["prompt"] = "Envie um novo documento para análise."  # Mensagem automática
+            st.session_state["etapa"] = "aguardando_pdf"
+            st.session_state.pop("arquivo_orcamento", None)
+            st.session_state["prompt"] = "Envie um novo documento para análise."
             st.rerun()
 
 st.title("🗨️ Assistente Digital - SEINFRA")
@@ -180,7 +120,7 @@ for msg in st.session_state.messages:
 # Disparar prompt automaticamente se houver ação
 if "prompt" in st.session_state and st.session_state["prompt"]:
     prompt = st.session_state["prompt"]
-    st.session_state["prompt"] = None  # Reset para evitar loops
+    st.session_state["prompt"] = None
 
     # Exibir prompt no chat
     st.session_state.messages.append({"role": "user", "content": prompt})
