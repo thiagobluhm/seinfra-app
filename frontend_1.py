@@ -3,9 +3,12 @@ import requests
 import hashlib
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # 🔗 URL do backend FastAPI (ajuste conforme a URL real do Web App na Azure)
 API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net"
+#API_URL = "http://127.0.0.1:8000"
 
 # 🔎 Função para listar arquivos do backend
 def listar_arquivos():
@@ -26,6 +29,7 @@ def listar_arquivos():
     except requests.RequestException as e:
         st.error(f"Erro ao buscar arquivos: {e}")
         return []
+    
 
 # 🔎 Função para gerar um identificador de conversa
 def conversaID():
