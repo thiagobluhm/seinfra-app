@@ -1,0 +1,16 @@
+*.mp4
+*.pdf
+*.png
+*.jpeg
+*.jpg
+*.docx
+*.zip
+clippings/
+models/
+pdfs/
+pdfs_/
+uploads/
+openai/clip-vit-large-patch14/
+openai/
+clip-vit-large-patch14/
+.env

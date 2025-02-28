@@ -1,0 +1,154 @@
+/* Corpo da página */
+body {
+    background-color:  #022b0c;
+    background-size: cover;
+    background-position: center;
+    margin: 0;
+    font-family: 'Helvetica', sans-serif;
+    color: #f5f5f5; /* Cor de texto (branco claro) */
+}
+
+p, a, cite, b {
+    color: #f5f5f5;
+}
+
+table {
+    color:aquamarine;
+    border-color: aquamarine;
+}
+
+.st-emotion-cache-1eo1tir {
+    width: 100%;
+    padding: 6rem 1rem 1rem;
+    max-width: 80%;
+}
+
+.st-emotion-cache-128upt6 {
+    position: relative;
+    bottom: 0px;
+    width: 100%;
+    min-width: 100%;
+    background-color:  #022b0c;
+    display: flex
+;
+    flex-direction: column;
+    -webkit-box-align: center;
+    align-items: center;
+}
+
+.st-emotion-cache-arzcut {
+    border-radius: 15px 15px 0 0;
+    background-color: rgba(15,138,71, 0.7) !important;
+}
+
+.st-emotion-cache-6qob1r {
+    background-color: #0a0101;
+}
+
+.st-emotion-cache-13k62yr, .st-emotion-cache-h4xjwg, .st-emotion-cache-hzygls {
+    background-color: #ffffff;
+}
+
+.st-emotion-cache-4oy321{
+    background-color: rgba(15,138,71, 0.8);
+}
+
+.st-emotion-cache-1c7y2kd {
+    background-color: rgba(15,138,71, 0.5);
+}
+
+/* Título principal (h1) */
+h1 {
+    color: #ffffff; /* Cinza claro */
+    text-align: center;
+}
+
+/* Subtítulos (h2, h3) */
+h2, h3 {
+    color: #d8d8d8; /* Outro tom de cinza claro */
+    text-align: center;
+}
+
+.st-emotion-cache-4oy321, .stChatMessage p {
+    color: #ffffff !important; /* Cinza claro */
+}
+
+/* Parágrafos */
+p {
+    color: #cfcfcf; /* Cinza claro */
+    line-height: 1.6;
+}
+
+ol, ul , li {color:#bfbfbf}
+
+/* Links */
+a {
+    color: #bfbfbf; /* Cinza médio */
+    text-decoration: none;
+}
+
+a:hover {
+    color: #ffffff; /* Branco ao passar o mouse */
+}
+
+textarea {
+    background-color: #0f0909;
+}
+
+/* Botões */
+button {
+    background-color: #333333; /* Cinza escuro */
+    color: #f5f5f5; /* Branco claro */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #444444; /* Cinza ligeiramente mais claro */
+}
+
+/* Containers e Widgets personalizados */
+.stButton>button {
+    background-color: #4a4a4a; /* Botões do Streamlit com fundo cinza escuro */
+    color: white;
+    border: 2px solid #333333;
+    border-radius: 10px;
+}
+
+.stTextInput>div>input {
+    background-color: #dddddd; /* Caixa de input com fundo cinza escuro */
+    color: white;
+    border: 2px solid #444444;
+}
+
+.stTextArea>div>textarea {
+    background-color: #262626; /* Caixa de textarea com fundo cinza escuro */
+    color: white;
+    border: 2px solid #444444;
+}
+
+.st-emotion-cache-1r4qj8v {
+    background-color: #7e2828;
+}
+
+.st-emotion-cache-arzcut, .st-emotion-cache-6qob1r {
+    background-color: #ffffff;
+}
+
+.st-emotion-cache-1dp5vir, .st-emotion-cache-12fmjuu, .st-emotion-cache-uhkwx6 {
+    background: none;
+}
+
+.st-emotion-cache-1r4qj8v{
+    background: none;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #ffffff; /* Preto com cinza */
+    color: #bfbfbf; /* Cinza médio */
+}
