@@ -58,11 +58,18 @@ def upload_to_api(uploaded_file):
     files = {"file": (uploaded_file.name, uploaded_file.getvalue())}
     response = requests.post("https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/upload", files=files)
 
-    if response.status_code == 200:
-        st.success(f"Arquivo enviado e salvo com sucesso no servidor.")
-        return response.json()["path"]
-    else:
-        st.error("Erro ao enviar o arquivo para o servidor.")
+    try:
+        response_json = response.json()
+        st.write("🔍 Resposta da API:", response_json)  # Loga a resposta para debugging
+
+        if response.status_code == 200 and "path" in response_json:
+            st.success(f"✅ Arquivo enviado e salvo com sucesso no servidor.")
+            return response_json["path"]
+        else:
+            st.error(f"⚠️ Erro ao enviar o arquivo: {response_json}")
+            return None
+    except Exception as e:
+        st.error(f"❌ Erro ao processar a resposta da API: {e}")
         return None
 
 
