@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 openai
 streamlit
 langchain
@@ -19,3 +20,27 @@ bs4
 #transformers
 Pillow
 #torch
+=======
+openai
+streamlit
+langchain
+langchain-community
+langchain-experimental
+langchain-openai
+langchain-chroma
+langchain-core
+psycopg2-binary
+sqlalchemy
+pandas
+numpy
+#dspy
+chromadb
+requests
+pymupdf
+bs4
+#statsmodels
+#transformers
+Pillow
+#torch
+python-multipart
+>>>>>>> cb74f65 (Subindo apenas a pasta SEINFRA_APP)

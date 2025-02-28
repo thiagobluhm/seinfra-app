@@ -1,0 +1,17 @@
+name: seinfra-app-v1
+
+services:
+  aistein: 
+    image: tbluhm/seinfra-app:v1
+    container_name: seinfra-app
+    restart: always
+    ports:
+      - "8000:8000"
+      - "8501:8501"
+      
+    entrypoint: ["/bin/bash", "-c", "uvicorn endpoint:app --host 0.0.0.0 --port 8000 & 
+                  streamlit run frontend_1.py --server.port 8501 --server.address 0.0.0.0"]
+
+    volumes:
+      #- ${WEBAPP_STORAGE_HOME}/arquivospdfs:/app/arquivospdfs  # Montar volume corretamente
+      - ./arquivospdfs:/app/arquivospdfs  # Montar volume corretamente
