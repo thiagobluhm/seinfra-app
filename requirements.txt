@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 openai
 streamlit
 langchain
@@ -21,6 +22,8 @@ bs4
 Pillow
 #torch
 =======
+=======
+>>>>>>> cb74f65e050f860f91314d9c1b9034fdbb42312e
 openai
 streamlit
 langchain
@@ -42,5 +45,9 @@ bs4
 #transformers
 Pillow
 #torch
+<<<<<<< HEAD
 python-multipart
 >>>>>>> cb74f65 (Subindo apenas a pasta SEINFRA_APP)
+=======
+python-multipart
+>>>>>>> cb74f65e050f860f91314d9c1b9034fdbb42312e
