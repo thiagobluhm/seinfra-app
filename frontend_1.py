@@ -43,16 +43,27 @@ def get_file_name(uploaded_file):
 #     return temp_file_path  # Retorna o caminho correto do arquivo salvo
 import requests
 
-def send_file_to_api(uploaded_file):
-    api_url = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/upload"
+# def send_file_to_api(uploaded_file):
+#     api_url = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/upload"
 
-    files = {"file": (uploaded_file.name, uploaded_file.getbuffer(), "application/pdf")}
-    response = requests.post(api_url, files=files)
+#     files = {"file": (uploaded_file.name, uploaded_file.getbuffer(), "application/pdf")}
+#     response = requests.post(api_url, files=files)
+
+#     if response.status_code == 200:
+#         return response.json()  # Sucesso
+#     else:
+#         return {"erro": "Falha ao enviar o arquivo para a API"}
+
+def upload_to_api(uploaded_file):
+    files = {"file": (uploaded_file.name, uploaded_file.getvalue())}
+    response = requests.post("https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net/upload", files=files)
 
     if response.status_code == 200:
-        return response.json()  # Sucesso
+        st.success(f"Arquivo enviado e salvo com sucesso no servidor.")
+        return response.json()["path"]
     else:
-        return {"erro": "Falha ao enviar o arquivo para a API"}
+        st.error("Erro ao enviar o arquivo para o servidor.")
+        return None
 
 
 # Função para enviar prompt para a API
@@ -130,13 +141,12 @@ with st.sidebar:
         #     st.session_state["prompt"] = f"Arquivo {uploaded_file.name} carregado. Extraia as informações do orçamento."
         #     st.session_state["etapa"] = "analise_feita"
 
-        if uploaded_file:
-            response = send_file_to_api(uploaded_file)
 
-            if "erro" in response:
-                st.error("Erro ao enviar o arquivo para a API. Tente novamente.")
-            else:
-                st.success(f"Arquivo enviado com sucesso! Caminho no servidor: {response['file_path']}")
+        if uploaded_file:
+            file_path = upload_to_api(uploaded_file)
+            if file_path:
+                st.session_state["arquivo_orcamento"] = file_path
+                st.session_state["etapa"] = "analise_feita"
 
 
     # Passo 3: Comparação com a Tabela de Insumos (sempre visível após análise)
