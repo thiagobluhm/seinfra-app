@@ -111,11 +111,11 @@ with st.sidebar:
             arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
 
             if arquivo_selecionado:
-                st.write(f"📄 Arquivo selecionado: `{arquivo_selecionado}`")
+                st.write(f"📄 Arquivo selecionado: `/home/arquivopdfs/{arquivo_selecionado}`")
                 st.session_state["arquivo_orcamento"] = arquivo_selecionado
 
                 # Apenas define o prompt para análise, mas não dispara automaticamente
-                st.session_state["prompt"] = f"Arquivo `{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
+                st.session_state["prompt"] = f"Arquivo `/home/arquivopdfs/{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
 
                 # Aciona o backend para processar o arquivo apenas quando o usuário clicar
                 if st.button("📊 Processar Arquivo"):
