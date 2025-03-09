@@ -88,6 +88,7 @@ def resetar_tudo():
     st.session_state["etapa"] = "inicio"
     st.rerun()
 
+
 # 📌 Layout da barra lateral
 with st.sidebar:
     st.image('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgcOUfw-4BV2YMHyaOIecFKJCuz6uURut4mg&s', use_container_width="auto")
@@ -95,51 +96,48 @@ with st.sidebar:
     if st.button("🧹 Resetar Tudo"):
         resetar_tudo()
 
-    # 🔎 Passo 1: Analisar Orçamento
+    # 🔎 Passo 1: Analisar Orçamento (agora apenas muda o estado, sem disparar análise automática)
     if st.session_state["etapa"] == "inicio":
         if st.button("📄 Analisar Orçamento"):
-            st.session_state["prompt"] = "Vou te passar um arquivo PDF com o orçamento de uma construtora. Quero que extraia as informações contidas neste arquivo."
             st.session_state["etapa"] = "aguardando_pdf"
 
-        # 📂 Passo 2: Selecionar um arquivo existente no volume do container
-        if st.session_state["etapa"] in ["aguardando_pdf", "analise_feita"]:
-            arquivos_disponiveis = listar_arquivos()
+    # 📂 Passo 2: Selecionar um arquivo existente no volume do container
+    if st.session_state["etapa"] in ["aguardando_pdf", "analise_feita"]:
+        arquivos_disponiveis = listar_arquivos()
 
-            if not arquivos_disponiveis:
-                st.warning("📂 Nenhum arquivo encontrado no diretório. Verifique se os arquivos foram carregados corretamente.")
-            else:
-                arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
-                
-                if arquivo_selecionado:
-                    st.write(f"📄 Arquivo selecionado: `{arquivo_selecionado}`")
-                    st.session_state["arquivo_orcamento"] = arquivo_selecionado
+        if not arquivos_disponiveis:
+            st.warning("📂 Nenhum arquivo encontrado no diretório. Verifique se os arquivos foram carregados corretamente.")
+        else:
+            arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
 
-                    # Apenas define o prompt para análise, mas não dispara automaticamente
-                    st.session_state["prompt"] = f"Arquivo `{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
+            if arquivo_selecionado:
+                st.write(f"📄 Arquivo selecionado: `{arquivo_selecionado}`")
+                st.session_state["arquivo_orcamento"] = arquivo_selecionado
 
-                    # Aciona o backend para processar o arquivo apenas quando o usuário clicar
-                    if st.button("📊 Processar Arquivo"):
-                        resposta = requests.post(
-                            f"{API_URL}/processar_arquivo",
-                            json={"arquivo": arquivo_selecionado}
-                        )
+                # Apenas define o prompt para análise, mas não dispara automaticamente
+                st.session_state["prompt"] = f"Arquivo `{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
+
+                # Aciona o backend para processar o arquivo apenas quando o usuário clicar
+                if st.button("📊 Processar Arquivo"):
+                    resposta = requests.post(
+                        f"{API_URL}/processar_arquivo",
+                        json={"arquivo": f"{STORAGE_DIR}/{arquivo_selecionado}"}  # Agora passa o caminho completo
+                    )
+
+                    if resposta.status_code == 200:
+                        resultado = resposta.json()
+                        st.success(f"✅ Processamento concluído! {resultado.get('mensagem', 'Arquivo analisado com sucesso.')}")
                         
-                        if resposta.status_code == 200:
-                            resultado = resposta.json()
-                            st.success(f"✅ Processamento concluído! {resultado.get('mensagem', 'Arquivo analisado com sucesso.')}")
-                            
-                            # Atualiza a sessão para permitir a comparação de insumos
-                            st.session_state["etapa"] = "analise_feita"
-                            st.rerun()
-                        else:
-                            st.error(f"🚨 Erro no processamento: {resposta.text}")
+                        # Atualiza a sessão para permitir a comparação de insumos
+                        st.session_state["etapa"] = "analise_feita"
+                        st.rerun()
+                    else:
+                        st.error(f"🚨 Erro no processamento: {resposta.text}")
 
-
-
-    # 📊 Passo 3: Comparação com a Tabela de Insumos
-    if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
+    # 📊 Passo 3: Comparação com a Tabela de Insumos (disponível após análise)
+    if st.session_state["etapa"] == "analise_feita":
         if st.button("📊 Comparar com Tabela de Insumos"):
-            st.session_state["prompt"] = "Agora que extraímos as informações do PDF com o orçamento, vamos comparar com a nossa tabela de insumos que está em nossa base de dados."
+            st.session_state["prompt"] = "Agora que extraímos as informações do PDF com o orçamento, vamos comparar com a nossa tabela de insumos."
             st.session_state["etapa"] = "comparacao_realizada"
             st.rerun()
 
@@ -150,6 +148,7 @@ with st.sidebar:
             st.session_state.pop("arquivo_orcamento", None)
             st.session_state["prompt"] = "Selecione um novo documento para análise."
             st.rerun()
+
 
 # 🏡 Título da página
 st.title("🗨️ Assistente Digital - SEINFRA")
