@@ -101,38 +101,38 @@ with st.sidebar:
             st.session_state["prompt"] = "Vou te passar um arquivo PDF com o orçamento de uma construtora. Quero que extraia as informações contidas neste arquivo."
             st.session_state["etapa"] = "aguardando_pdf"
 
-    # 📂 Passo 2: Selecionar um arquivo existente no volume do container
-    if st.session_state["etapa"] in ["aguardando_pdf", "analise_feita"]:
-        arquivos_disponiveis = listar_arquivos()
+        # 📂 Passo 2: Selecionar um arquivo existente no volume do container
+        if st.session_state["etapa"] in ["aguardando_pdf", "analise_feita"]:
+            arquivos_disponiveis = listar_arquivos()
 
-        if not arquivos_disponiveis:
-            st.warning("📂 Nenhum arquivo encontrado no diretório. Verifique se os arquivos foram carregados corretamente.")
-        else:
-            arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
-            
-            if arquivo_selecionado:
-                st.write(f"📄 Arquivo selecionado: `{arquivo_selecionado}`")
-                st.session_state["arquivo_orcamento"] = arquivo_selecionado
+            if not arquivos_disponiveis:
+                st.warning("📂 Nenhum arquivo encontrado no diretório. Verifique se os arquivos foram carregados corretamente.")
+            else:
+                arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
+                
+                if arquivo_selecionado:
+                    st.write(f"📄 Arquivo selecionado: `{arquivo_selecionado}`")
+                    st.session_state["arquivo_orcamento"] = arquivo_selecionado
 
-                # Apenas define o prompt para análise, mas não dispara automaticamente
-                st.session_state["prompt"] = f"Arquivo `{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
+                    # Apenas define o prompt para análise, mas não dispara automaticamente
+                    st.session_state["prompt"] = f"Arquivo `{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
 
-                # Aciona o backend para processar o arquivo apenas quando o usuário clicar
-                if st.button("📊 Processar Arquivo"):
-                    resposta = requests.post(
-                        f"{API_URL}/processar_arquivo",
-                        json={"arquivo": arquivo_selecionado}
-                    )
-                    
-                    if resposta.status_code == 200:
-                        resultado = resposta.json()
-                        st.success(f"✅ Processamento concluído! {resultado.get('mensagem', 'Arquivo analisado com sucesso.')}")
+                    # Aciona o backend para processar o arquivo apenas quando o usuário clicar
+                    if st.button("📊 Processar Arquivo"):
+                        resposta = requests.post(
+                            f"{API_URL}/processar_arquivo",
+                            json={"arquivo": arquivo_selecionado}
+                        )
                         
-                        # Atualiza a sessão para permitir a comparação de insumos
-                        st.session_state["etapa"] = "analise_feita"
-                        st.rerun()
-                    else:
-                        st.error(f"🚨 Erro no processamento: {resposta.text}")
+                        if resposta.status_code == 200:
+                            resultado = resposta.json()
+                            st.success(f"✅ Processamento concluído! {resultado.get('mensagem', 'Arquivo analisado com sucesso.')}")
+                            
+                            # Atualiza a sessão para permitir a comparação de insumos
+                            st.session_state["etapa"] = "analise_feita"
+                            st.rerun()
+                        else:
+                            st.error(f"🚨 Erro no processamento: {resposta.text}")
 
 
 
