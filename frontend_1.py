@@ -11,7 +11,7 @@ API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net"
 #API_URL = "http://127.0.0.1:8000"
 
 # Diretório onde os arquivos PDF estão armazenados dentro do container (volume montado)
-AZURE_STORAGE_DIR = "/home" #os.environ.get("WEBAPP_STORAGE_HOME")
+AZURE_STORAGE_DIR = "/home"#os.environ.get("WEBAPP_STORAGE_HOME")
 STORAGE_DIR = f"{AZURE_STORAGE_DIR}/arquivopdfs"
 
 # # Garante que o diretório existe
@@ -98,7 +98,7 @@ with st.sidebar:
 
     # 🔎 Passo 1: Analisar Orçamento (agora apenas muda o estado, sem disparar análise automática)
     if st.session_state["etapa"] == "inicio":
-        if st.button("📄 Analisar Orçamento"):
+        if st.button("📄 Passo 1: Analisar Orçamento"):
             st.session_state["etapa"] = "aguardando_pdf"
 
     # 📂 Passo 2: Selecionar um arquivo existente no volume do container
@@ -121,7 +121,7 @@ with st.sidebar:
                 if st.button("📊 Processar Arquivo"):
                     resposta = requests.post(
                         f"{API_URL}/processar_arquivo",
-                        json={"arquivo": f"{STORAGE_DIR}/{arquivo_selecionado}"}  # Agora passa o caminho completo
+                        json={"arquivo": f"/home/arquivopdfs/{arquivo_selecionado}"}  # Agora passa o caminho completo
                     )
 
                     if resposta.status_code == 200:
@@ -136,7 +136,7 @@ with st.sidebar:
 
     # 📊 Passo 3: Comparação com a Tabela de Insumos (disponível após análise)
     if st.session_state["etapa"] == "analise_feita":
-        if st.button("📊 Comparar com Tabela de Insumos"):
+        if st.button("📊 Passo 2: Comparar com Tabela de Insumos"):
             st.session_state["prompt"] = "Agora que extraímos as informações do PDF com o orçamento, vamos comparar com a nossa tabela de insumos."
             st.session_state["etapa"] = "comparacao_realizada"
             st.rerun()
@@ -151,7 +151,7 @@ with st.sidebar:
 
 
 # 🏡 Título da página
-st.title("🗨️ Assistente Digital1 - SEINFRA")
+st.title("🗨️ Assistente Digital - SEINFRA")
 
 # 💬 Exibir mensagens na interface do chat
 for msg in st.session_state.messages:
