@@ -10,6 +10,15 @@ load_dotenv()
 API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net"
 #API_URL = "http://127.0.0.1:8000"
 
+# Diretório onde os arquivos PDF estão armazenados dentro do container (volume montado)
+AZURE_STORAGE_DIR = os.environ.get("WEBAPP_STORAGE_HOME")
+STORAGE_DIR = f"{AZURE_STORAGE_DIR}/arquivopdfs"
+
+# Garante que o diretório existe
+if not os.path.exists(STORAGE_DIR):
+    st.warning(f"🚨 Diretório {STORAGE_DIR} não encontrado! Verifique a configuração do volume.")
+
+
 # 🔎 Função para listar arquivos do backend
 def listar_arquivos():
     try:
