@@ -151,7 +151,7 @@ with st.sidebar:
 
 
 # 🏡 Título da página
-st.title("🗨️ Assistente Digital - SEINFRA")
+st.title("🗨️ Assistente Digital1 - SEINFRA")
 
 # 💬 Exibir mensagens na interface do chat
 for msg in st.session_state.messages:
