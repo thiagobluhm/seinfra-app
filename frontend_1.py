@@ -11,7 +11,7 @@ API_URL = "https://seinfra-dwgwbrfscfbpdugu.eastus2-01.azurewebsites.net"
 #API_URL = "http://127.0.0.1:8000"
 
 # Diretório onde os arquivos PDF estão armazenados dentro do container (volume montado)
-AZURE_STORAGE_DIR = "/home"#os.environ.get("WEBAPP_STORAGE_HOME")
+AZURE_STORAGE_DIR = "/home" #os.environ.get("WEBAPP_STORAGE_HOME")
 STORAGE_DIR = f"{AZURE_STORAGE_DIR}/arquivopdfs"
 
 # # Garante que o diretório existe
@@ -96,30 +96,30 @@ with st.sidebar:
     if st.button("🧹 Resetar Tudo"):
         resetar_tudo()
 
-    # 🔎 Passo 1: Analisar Orçamento (Apenas altera o estado, sem processar nada)
+    # 🔎 Passo 0: Botão inicial para iniciar a análise
     if st.session_state["etapa"] == "inicio":
-        if st.button("📄 Analisar Orçamento"):
-            st.session_state["etapa"] = "aguardando_pdf"
+        if st.button(f"📄 Analisar Orçamento ({STORAGE_DIR})"):
+            st.session_state["etapa"] = "selecionar_arquivo"
 
-    # 📂 Passo 2: Selecionar um arquivo existente no volume do container
-    if st.session_state["etapa"] == "aguardando_pdf":
+    # 📂 Passo 1: Selecionar um arquivo existente no volume do container
+    if st.session_state["etapa"] in ["selecionar_arquivo", "arquivo_selecionado"]:
         arquivos_disponiveis = listar_arquivos()
 
         if not arquivos_disponiveis:
             st.warning("📂 Nenhum arquivo encontrado no diretório. Verifique se os arquivos foram carregados corretamente.")
         else:
-            arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
+            arquivo_selecionado = st.selectbox(f"📂 Selecione um arquivo para análise ({STORAGE_DIR}):", arquivos_disponiveis, index=0)
 
             if arquivo_selecionado:
-                caminho_completo = f"/home/arquivopdfs/{arquivo_selecionado}"
+                caminho_completo = f"{STORAGE_DIR}/{arquivo_selecionado}"
                 st.session_state["arquivo_orcamento"] = caminho_completo
                 st.write(f"📄 Arquivo selecionado: `{caminho_completo}`")
 
-                # Agora sim exibe o botão para processar arquivo
+                # Agora exibe o botão para processar o arquivo
                 if st.button("📊 Processar Arquivo"):
                     resposta = requests.post(
                         f"{API_URL}/processar_arquivo",
-                        json={"arquivo": caminho_completo}  # Envia o caminho correto
+                        json={"arquivo": caminho_completo}
                     )
 
                     if resposta.status_code == 200:
@@ -127,25 +127,26 @@ with st.sidebar:
                         st.success(f"✅ Processamento concluído! {resultado.get('mensagem', 'Arquivo analisado com sucesso.')}")
                         
                         # Atualiza a etapa para permitir a comparação de insumos
-                        st.session_state["etapa"] = "analise_feita"
+                        st.session_state["etapa"] = "arquivo_processado"
                         st.rerun()
                     else:
                         st.error(f"🚨 Erro no processamento: {resposta.text}")
 
-    # 📊 Passo 3: Comparação com a Tabela de Insumos (Só aparece depois do processamento)
-    if st.session_state["etapa"] == "analise_feita":
-        if st.button("📊 Passo 2: Comparar com Tabela de Insumos"):
+    # 📊 Passo 2: Comparação com a Tabela de Insumos (Só aparece depois do processamento)
+    if st.session_state["etapa"] == "arquivo_processado":
+        if st.button("📊 Comparar com Tabela de Insumos"):
             st.session_state["prompt"] = "Agora que extraímos as informações do orçamento, vamos comparar com a tabela de insumos."
             st.session_state["etapa"] = "comparacao_realizada"
             st.rerun()
 
-    # 🔄 Novo Botão: Verificar Outro Documento (disponível após a análise)
-    if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
+    # 🔄 Passo 3: Verificar Outro Documento (Só aparece após a comparação)
+    if st.session_state["etapa"] == "comparacao_realizada":
         if st.button("🔄 Verificar Outro Documento"):
-            st.session_state["etapa"] = "aguardando_pdf"
+            st.session_state["etapa"] = "selecionar_arquivo"
             st.session_state.pop("arquivo_orcamento", None)
-            st.session_state["prompt"] = "Selecione um novo documento para análise."
+            st.session_state["prompt"] = None  # 🔹 Agora NÃO dispara requisição automaticamente!
             st.rerun()
+
 
 
 # 🏡 Título da página
