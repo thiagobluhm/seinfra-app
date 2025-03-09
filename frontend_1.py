@@ -96,13 +96,13 @@ with st.sidebar:
     if st.button("🧹 Resetar Tudo"):
         resetar_tudo()
 
-    # 🔎 Passo 1: Analisar Orçamento (agora apenas muda o estado, sem disparar análise automática)
+    # 🔎 Passo 1: Analisar Orçamento (Apenas altera o estado, sem processar nada)
     if st.session_state["etapa"] == "inicio":
-        if st.button("📄 Passo 1: Analisar Orçamento"):
+        if st.button("📄 Analisar Orçamento"):
             st.session_state["etapa"] = "aguardando_pdf"
 
     # 📂 Passo 2: Selecionar um arquivo existente no volume do container
-    if st.session_state["etapa"] in ["aguardando_pdf", "analise_feita"]:
+    if st.session_state["etapa"] == "aguardando_pdf":
         arquivos_disponiveis = listar_arquivos()
 
         if not arquivos_disponiveis:
@@ -111,37 +111,35 @@ with st.sidebar:
             arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
 
             if arquivo_selecionado:
-                st.write(f"📄 Arquivo selecionado: `/home/arquivopdfs/{arquivo_selecionado}`")
-                st.session_state["arquivo_orcamento"] = arquivo_selecionado
+                caminho_completo = f"/home/arquivopdfs/{arquivo_selecionado}"
+                st.session_state["arquivo_orcamento"] = caminho_completo
+                st.write(f"📄 Arquivo selecionado: `{caminho_completo}`")
 
-                # Apenas define o prompt para análise, mas não dispara automaticamente
-                st.session_state["prompt"] = f"Arquivo `/home/arquivopdfs/{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
-
-                # Aciona o backend para processar o arquivo apenas quando o usuário clicar
+                # Agora sim exibe o botão para processar arquivo
                 if st.button("📊 Processar Arquivo"):
                     resposta = requests.post(
                         f"{API_URL}/processar_arquivo",
-                        json={"arquivo": f"/home/arquivopdfs/{arquivo_selecionado}"}  # Agora passa o caminho completo
+                        json={"arquivo": caminho_completo}  # Envia o caminho correto
                     )
 
                     if resposta.status_code == 200:
                         resultado = resposta.json()
                         st.success(f"✅ Processamento concluído! {resultado.get('mensagem', 'Arquivo analisado com sucesso.')}")
                         
-                        # Atualiza a sessão para permitir a comparação de insumos
+                        # Atualiza a etapa para permitir a comparação de insumos
                         st.session_state["etapa"] = "analise_feita"
                         st.rerun()
                     else:
                         st.error(f"🚨 Erro no processamento: {resposta.text}")
 
-    # 📊 Passo 3: Comparação com a Tabela de Insumos (disponível após análise)
+    # 📊 Passo 3: Comparação com a Tabela de Insumos (Só aparece depois do processamento)
     if st.session_state["etapa"] == "analise_feita":
         if st.button("📊 Passo 2: Comparar com Tabela de Insumos"):
-            st.session_state["prompt"] = "Agora que extraímos as informações do PDF com o orçamento, vamos comparar com a nossa tabela de insumos."
+            st.session_state["prompt"] = "Agora que extraímos as informações do orçamento, vamos comparar com a tabela de insumos."
             st.session_state["etapa"] = "comparacao_realizada"
             st.rerun()
 
-    # 🔄 Novo Botão: Verificar Outro Documento
+    # 🔄 Novo Botão: Verificar Outro Documento (disponível após a análise)
     if st.session_state["etapa"] in ["analise_feita", "comparacao_realizada"]:
         if st.button("🔄 Verificar Outro Documento"):
             st.session_state["etapa"] = "aguardando_pdf"
