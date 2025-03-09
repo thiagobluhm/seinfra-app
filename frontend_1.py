@@ -105,25 +105,35 @@ with st.sidebar:
     if st.session_state["etapa"] in ["aguardando_pdf", "analise_feita"]:
         arquivos_disponiveis = listar_arquivos()
 
-        arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis)
-        if arquivo_selecionado and arquivo_selecionado != "Nenhum arquivo disponível":
-            st.write(f"📄 Arquivo selecionado: {arquivo_selecionado}")
-            st.session_state["arquivo_orcamento"] = arquivo_selecionado
-            st.session_state["prompt"] = f"Arquivo `{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
+        if not arquivos_disponiveis:
+            st.warning("📂 Nenhum arquivo encontrado no diretório. Verifique se os arquivos foram carregados corretamente.")
+        else:
+            arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
+            
+            if arquivo_selecionado:
+                st.write(f"📄 Arquivo selecionado: `{arquivo_selecionado}`")
+                st.session_state["arquivo_orcamento"] = arquivo_selecionado
 
-            # Aciona o backend para processar o arquivo
-            if st.button("📊 Processar Arquivo"):
-                resposta = requests.post(
-                    f"{API_URL}/processar_arquivo",
-                    json={"arquivo": arquivo_selecionado}
-                )
-                
-                if resposta.status_code == 200:
-                    st.success(f"✅ Processamento concluído! Resposta: {resposta.json()}")
-                    st.session_state["etapa"] = "analise_feita"
-                    st.rerun()
-                else:
-                    st.error(f"🚨 Erro no processamento: {resposta.text}")
+                # Apenas define o prompt para análise, mas não dispara automaticamente
+                st.session_state["prompt"] = f"Arquivo `{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
+
+                # Aciona o backend para processar o arquivo apenas quando o usuário clicar
+                if st.button("📊 Processar Arquivo"):
+                    resposta = requests.post(
+                        f"{API_URL}/processar_arquivo",
+                        json={"arquivo": arquivo_selecionado}
+                    )
+                    
+                    if resposta.status_code == 200:
+                        resultado = resposta.json()
+                        st.success(f"✅ Processamento concluído! {resultado.get('mensagem', 'Arquivo analisado com sucesso.')}")
+                        
+                        # Atualiza a sessão para permitir a comparação de insumos
+                        st.session_state["etapa"] = "analise_feita"
+                        st.rerun()
+                    else:
+                        st.error(f"🚨 Erro no processamento: {resposta.text}")
+
 
 
     # 📊 Passo 3: Comparação com a Tabela de Insumos
