@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import fitz  # PyMuPDF
 from openai import OpenAI
-from docx import Document
+#from docx import Document
 import re
 from io import BytesIO
 from dotenv import load_dotenv
