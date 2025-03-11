@@ -21,3 +21,4 @@ Pillow
 #torch
 python-multipart
 streamlit_pdf_viewer
+tqdm
