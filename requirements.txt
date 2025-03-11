@@ -20,3 +20,4 @@ bs4
 Pillow
 #torch
 python-multipart
+streamlit_pdf_viewer
