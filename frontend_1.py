@@ -88,7 +88,6 @@ def resetar_tudo():
     st.session_state["etapa"] = "inicio"
     st.rerun()
 
-
 # 📌 Layout da barra lateral
 with st.sidebar:
     st.image('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgcOUfw-4BV2YMHyaOIecFKJCuz6uURut4mg&s', use_container_width="auto")
@@ -108,27 +107,32 @@ with st.sidebar:
         if not arquivos_disponiveis:
             st.warning("📂 Nenhum arquivo encontrado no diretório. Verifique se os arquivos foram carregados corretamente.")
         else:
-            arquivo_selecionado = st.selectbox("📂 Selecione um arquivo para análise:", arquivos_disponiveis, index=0)
+            # Adiciona opção de placeholder para forçar a escolha do usuário
+            opcoes = ["Selecione um arquivo"] + arquivos_disponiveis
+            arquivo_escolhido = st.selectbox("📂 Selecione um arquivo para análise:", opcoes, index=0)
 
-            if arquivo_selecionado:
-                st.write(f"📄 Arquivo selecionado: `/home/arquivopdfs/{arquivo_selecionado}`")
-                st.session_state["arquivo_orcamento"] = arquivo_selecionado
+            # Apenas exibe a seleção sem disparar processamento automaticamente
+            if arquivo_escolhido != "Selecione um arquivo":
+                st.write(f"📄 Arquivo selecionado: `/home/arquivopdfs/{arquivo_escolhido}`")
 
-                # Apenas define o prompt para análise, mas não dispara automaticamente
-                st.session_state["prompt"] = f"Arquivo `/home/arquivopdfs/{arquivo_selecionado}` selecionado. Extraia as informações do orçamento."
-
-                # Aciona o backend para processar o arquivo apenas quando o usuário clicar
+            # O processamento só é acionado quando o botão é clicado
+            if arquivo_escolhido != "Selecione um arquivo":
                 if st.button("📊 Processar Arquivo"):
+                    # Registra o arquivo escolhido e define o prompt para análise
+                    st.session_state["arquivo_orcamento"] = arquivo_escolhido
+                    st.session_state["prompt"] = (
+                        f"Arquivo `/home/arquivopdfs/{arquivo_escolhido}` selecionado. "
+                        "Extraia as informações do orçamento."
+                    )
+                    
                     resposta = requests.post(
                         f"{API_URL}/processar_arquivo",
-                        json={"arquivo": f"/home/arquivopdfs/{arquivo_selecionado}"}  # Agora passa o caminho completo
+                        json={"arquivo": f"/home/arquivopdfs/{arquivo_escolhido}"}
                     )
 
                     if resposta.status_code == 200:
                         resultado = resposta.json()
                         st.success(f"✅ Processamento concluído! {resultado.get('mensagem', 'Arquivo analisado com sucesso.')}")
-                        
-                        # Atualiza a sessão para permitir a comparação de insumos
                         st.session_state["etapa"] = "analise_feita"
                         st.rerun()
                     else:
@@ -148,7 +152,6 @@ with st.sidebar:
             st.session_state.pop("arquivo_orcamento", None)
             st.session_state["prompt"] = "Selecione um novo documento para análise."
             st.rerun()
-
 
 # 🏡 Título da página
 st.title("🗨️ Assistente Digital - SEINFRA")
